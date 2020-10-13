@@ -8,8 +8,10 @@ from __future__ import absolute_import
 
 import os
 import logging
+
 from six.moves import configparser
 
+from .exceptions import ConfigurationFileNotFound
 from .exceptions import AgnosticFileStorageError
 from .core import AFSFile, AFSDirectory, AFSListing
 from .afs_smb import SMBFileStorage
@@ -19,7 +21,6 @@ from .afs_local import LocalFileStorage
 _first_option_filename = ''
 
 
-from .exceptions import AgnosticFileStorageError, ConfigurationFileNotFound
 
 
 def get_options_filename():
