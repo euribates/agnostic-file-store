@@ -15,6 +15,7 @@ from .core import AFSFile, AFSDirectory, AFSListing
 from .afs_smb import SMBFileStorage
 from .afs_local import LocalFileStorage
 
+
 _first_option_filename = ''
 
 

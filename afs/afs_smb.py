@@ -7,13 +7,13 @@ from __future__ import unicode_literals
 from __future__ import absolute_import
 
 import os
-from . import log
 import socket
 
 from .core import AFSFile, AFSDirectory, AFSListing, AgnosticFileStorage
 from .exceptions import AgnosticFileStorageError
+from . import log
 
-from smb.SMBConnection import SMBConnection
+from .SMBConnection import SMBConnection
 from smb import smb_structs
 from smb.smb_structs import OperationFailure
 
