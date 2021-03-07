@@ -6,7 +6,7 @@ from distutils.core import setup
 setup(
     name='agnostic-file-store',
     packages=['afs'],
-    version='0.3.1',
+    version='0.4.1',
     description='An agnostic, easy-to-use module for different file systems'
                   ' (At present just local an SMB)',
     author='Juan Ignacio Rodríguez de León',

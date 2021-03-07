@@ -6,21 +6,23 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from __future__ import absolute_import
 
-import os
 import socket
+
+import smb
+from smb.smb_structs import OperationFailure
 
 from .core import AFSFile, AFSDirectory, AFSListing, AgnosticFileStorage
 from .exceptions import AgnosticFileStorageError
 from . import log
 
-from .SMBConnection import SMBConnection
-from smb import smb_structs
-from smb.smb_structs import OperationFailure
+
 
 NUM_RETRIES = 15
 
+
 LOG_LEVEL = log.INFO
 logger = log.get_logger(__name__, LOG_LEVEL)
+
 
 class SMBFileStorage(AgnosticFileStorage):
 
@@ -41,7 +43,6 @@ class SMBFileStorage(AgnosticFileStorage):
         self.domain = self.get_value(kwargs, 'domain').encode('utf-8')
         self.service = self.get_value(kwargs, 'service').encode('utf-8')
         self.fqn = '{}.{}'.format(self.host, self.domain)
-        #print(self.fqn)
         self.server_ip = socket.gethostbyname(self.fqn)
         self.is_connected = False
 
@@ -61,14 +62,14 @@ class SMBFileStorage(AgnosticFileStorage):
         return '\n'.join(buff)
 
     def open(self):
-        self.conn = SMBConnection(
+        self.conn = smb.SMBConnection(
             self.username,
             self.password,
             self.client,
             self.host,
             self.domain,
             use_ntlm_v2=False,
-            sign_options=SMBConnection.SIGN_NEVER,
+            sign_options=smb.SMBConnection.SIGN_NEVER,
             is_direct_tcp=True,
             )
         self.is_connected = self.conn.connect(self.server_ip, 445)
@@ -83,7 +84,7 @@ class SMBFileStorage(AgnosticFileStorage):
         try:
             attr = self.conn.getAttributes(self.service, full_path, timeout=30)
             return attr.isDirectory
-        except OperationFailure as err:
+        except OperationFailure:
             return False
 
     def is_file(self, path):
@@ -91,14 +92,14 @@ class SMBFileStorage(AgnosticFileStorage):
         try:
             attr = self.conn.getAttributes(self.service, full_path, timeout=30)
             return not attr.isDirectory
-        except OperationFailure as err:
+        except OperationFailure:
             return False
 
-
     def ls(self):
-        logger.debug('Calling method ls in SMBFileStorage("{}")'.format(self.name))
+        logger.info('Call method ls in SMBFileStorage("%s")', self.name)
+        tries = 0
         if self.is_connected:
-            for i in range(NUM_RETRIES):
+            while tries < NUM_RETRIES:
                 try:
                     result = AFSListing()
                     path = '/'.join(self.cwd())
@@ -110,6 +111,8 @@ class SMBFileStorage(AgnosticFileStorage):
                     return result
                 except Exception as err:
                     pass
+                finally:
+                    tries += 1
             raise AgnosticFileStorageError(
                 "Can't read the content of {}".format(self.cwd())
                 )
