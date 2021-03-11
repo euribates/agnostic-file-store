@@ -37,14 +37,14 @@ to the dir, for every directory::
             fs.cd(dir)
         # You can save the file now
 
-Using the ``set_path`` method make all this steps with one single call::
+Using the `set_path` method make all this steps with one single call::
 
     with afs.connect('static') as fs:
         fs.set_path('media', 'public', '2016', 'sep', '14')
         # You can save the file now
 
 
-The entry ``temp`` is defined in a configuration file, using
+The entry `temp` is defined in a configuration file, using
 a format similar to windows .INI files, like this:
 
     [temp]
@@ -52,7 +52,7 @@ a format similar to windows .INI files, like this:
     base: /tmp
 
 We can now switch to another directory by just replacing the 
-``temp`` base entry to the desired base path, for example. More 
+`temp` base entry to the desired base path, for example. More 
 interesting, you can change to a network SMB Server, modifying the 
 configuration file to:
 
@@ -66,7 +66,7 @@ configuration file to:
 
 ## Things to do
 
- * Add more storage file systems, for example Amazon S3 and NFS
+ * Add more storage file systems: NFS, Amazon S3, SFTP
 
  * Improve security, nobody likes password stored as plain text
    in configuration files.

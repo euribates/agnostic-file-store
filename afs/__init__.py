@@ -1,10 +1,53 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import absolute_import
+"""
+# AFS - Agnostic File Storage
+
+The purpose of this module is to offer an agnostic, easy-to-use module
+for different file systems (At present time, just local and SMB/CIFS).
+The initial use of this module was provide an easy path to translate
+local file systems operations to a network samba server.
+
+## Example of use
+
+So, you can translate code like this:
+
+    if os.path.isdir('/tmp/token.txt'):
+        if not os.path.isdir('/tmp/results'):
+            os.mkdir('/tmp/results')
+        with open('/tmp/results/data.txt', 'wb') as f:
+            f.write('This is an example\n')
+
+To something like this (which must work identical):
+
+    with afs.connect('temp') as fs:
+        if not fs.isdir('results'):
+            fs.mkdir('results')
+        fs.cd('results')
+        fs.save('data.txt', 'This is an example\n')
+
+The entry `temp` is defined in a configuration file, using a format
+similar to windows .INI files, like this:
+
+    [temp]
+    kind: local
+    base: /tmp
+
+We can now switch to another directory by just replacing the `temp` base
+entry to the desired base path, for example. More interesting, you can
+change to a network SMB Server, modifying the configuration file to:
+
+    [temp]
+    kind: smb
+    username: samba_user
+    password: samba_password
+    host: nas
+    domain: mycompany.com
+    service: test$
+"""
+
+__version__ = '0.4.1'
 
 import os
 
@@ -15,8 +58,6 @@ from .afs_memory import MemoryFileStorage
 from .afs_smb import SMBFileStorage
 from .afs_local import LocalFileStorage
 
-
-__version__ = '0.4.1'
 
 _first_option_filename = ''
 

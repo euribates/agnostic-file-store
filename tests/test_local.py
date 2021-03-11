@@ -26,6 +26,7 @@ def assert_archive_or_dir(item):
             )
         )
 
+
 @pytest.fixture
 def tmp_file():
     file_name = '/tmp/afs_token.txt'
@@ -74,37 +75,35 @@ class TestMakeDir(unittest.TestCase):
 
 
 @pytest.mark.skip
-class TestSaveFiles(unittest.TestCase):
+def test_save_text():
+    afs.configure_dict({
+        'localtemp': {
+            'kind': 'local',
+            'base': '/tmp',
+            }
+        })
+    with afs.connect('localtmp') as fs:
+        stream = StringIO(
+            'hola, mundo reseña árbol épico '
+            'ínclito único óbice'.encode('utf-8')
+            )
+        size = fs.save('testigo.txt', stream)
+        assert fs.is_file('testigo.txt')
+        assert size == 56
 
-    def test_save_text(self):
-        with afs.connect('localtmp') as fs:
-            stream = StringIO(
-                'hola, mundo reseña árbol épico '
-                'ínclito único óbice'.encode('utf-8')
-                )
-            size = fs.save('testigo.txt', stream)
-            self.assertTrue(fs.is_file('testigo.txt'))
-            self.assertEqual(size, 56)
 
-
-    def test_save_image(self):
-        with afs.connect('localtmp') as fs:
-            size = fs.save('escudo.png', open('/home/jileon/wwwroot/art/escudo.png', 'rb'))
-            self.assertTrue(fs.is_file('escudo.png'))
-            self.assertEqual(size, 3514)
-
-    def test_save_image_from_pil(self):
-        from PIL import Image, ImageDraw
-        size = (256, 256)
-        im = Image.new("RGB", size, "white")
-        draw = ImageDraw.Draw(im)
-        draw.line((0, 0) + im.size, fill=128)
-        draw.line((0, im.size[1], im.size[0], 0), fill=128)
-        with afs.connect('localtmp') as fs:
-            buff = StringIO()
-            im.save(buff, format="PNG")
-            buff.seek(0)
-            fs.save('imagen.png', buff)
+@pytest.mark.skip
+def test_save_image():
+    afs.configure_dict({
+        'localtemp': {
+            'kind': 'local',
+            'base': '/tmp',
+            }
+        })
+    with afs.connect('localtmp') as fs:
+        size = fs.save('escudo.png', open('./escudo.png', 'rb'))
+        assert fs.is_file('escudo.png')
+        assert size == 3514
 
 
 @pytest.mark.skip
