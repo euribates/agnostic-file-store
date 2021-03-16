@@ -8,13 +8,12 @@ from __future__ import absolute_import
 
 import socket
 
-import smb
+from smb.SMBConnection import SMBConnection
 from smb.smb_structs import OperationFailure
 
 from .core import AFSFile, AFSDirectory, AFSListing, AgnosticFileStorage
 from .exceptions import AgnosticFileStorageError
 from . import log
-
 
 
 NUM_RETRIES = 15
@@ -43,7 +42,10 @@ class SMBFileStorage(AgnosticFileStorage):
         self.domain = self.get_value(kwargs, 'domain').encode('utf-8')
         self.service = self.get_value(kwargs, 'service').encode('utf-8')
         self.fqn = '{}.{}'.format(self.host, self.domain)
-        self.server_ip = socket.gethostbyname(self.fqn)
+        try:
+            self.server_ip = socket.gethostbyname(self.fqn)
+        except OSError:
+            self.server_ip = None
         self.is_connected = False
 
     def __str__(self):
@@ -62,14 +64,14 @@ class SMBFileStorage(AgnosticFileStorage):
         return '\n'.join(buff)
 
     def open(self):
-        self.conn = smb.SMBConnection(
+        self.conn = SMBConnection(
             self.username,
             self.password,
             self.client,
             self.host,
             self.domain,
             use_ntlm_v2=False,
-            sign_options=smb.SMBConnection.SIGN_NEVER,
+            sign_options=SMBConnection.SIGN_NEVER,
             is_direct_tcp=True,
             )
         self.is_connected = self.conn.connect(self.server_ip, 445)

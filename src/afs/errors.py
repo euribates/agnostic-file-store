@@ -39,3 +39,12 @@ def rm_can_not_delete_directories():
         "Can't delete a directory with method rm().\n"
         "Use the rmdir() method."
         )
+
+
+def config_file_not_found(kind, config_file):
+    return ValueError(
+        "Don't know how to handle this kind "
+        "of file storage service: {k}.\n"
+        "Configuration file is {f}."
+        .format(k=kind, f=config_file)
+        )

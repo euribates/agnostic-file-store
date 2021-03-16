@@ -104,7 +104,7 @@ class AgnosticFileStorage(object):
 
     def get_value(self, dict, name, default=None):
         value = dict.get(name, default)
-        if value.startswith('%') and value.endswith('%'):
+        if value and value.startswith('%') and value.endswith('%'):
             env_entry = value[1:-1]
             return os.environ.get(env_entry, default)
         else:

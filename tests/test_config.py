@@ -11,23 +11,37 @@ import pytest
 import afs
 
 
-def test_afs_get_options_filename():
-    options = afs.get_options_filename()
-    for path in options:
-        assert path.endswith('afs.ini')
-
-
-@pytest.mark.skip
-def test_call_connect_with_options_filename():
-    local_config_file = 'afs-test-config.ini'
-    with afs.connect('localtest', local_config_file) as _fs:
+def test_call_connect_local():
+    afs.add_source('localtest', {
+        'kind': 'local',
+        'base': '/tmp',
+    })
+    with afs.connect('localtest') as _fs:
         assert _fs.base == '/tmp'
 
-    with afs.connect('smbtest', local_config_file) as _fs:
-        assert _fs.username == 'jileon'
-        assert _fs.host == 'nas1'
-        assert _fs.domain == 'parcan.es'
-        assert _fs.service == 'test$'
+
+def test_call_connect_smb():
+    afs.add_source('smbtest', {
+        'kind': 'smb',
+        'username': 'jileon',
+        'host': 'localhost',
+        'domain': '',
+        'service': 'test$',
+        'password': 'dfbef574829',
+    })
+    _fs = afs.sources['smbtest']
+    assert _fs.username == b'jileon'
+    assert _fs.host == b'localhost'
+    assert _fs.domain == b''
+    assert _fs.service == b'test$'
+
+
+def test_call_connect_memory():
+    afs.add_source('memtest', {
+        'kind': 'memory',
+    })
+    with afs.connect('memtest') as _fs:
+        assert _fs.root == {}
 
 
 if __name__ == '__main__':

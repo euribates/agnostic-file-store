@@ -57,6 +57,7 @@ class LocalFileStorage(AgnosticFileStorage):
                 result.append(AFSFile(filename, os.path.getsize(full_path)))
             else:
                 result.append(AFSDirectory(filename, 0))
+        return result
 
     def save(self, filename, stream):
         logger.debug('LocalFileStore::save(%r, %s)', filename, stream)

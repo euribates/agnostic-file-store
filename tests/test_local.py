@@ -6,6 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from __future__ import absolute_import
 
+import tempfile
 from six.moves import StringIO
 
 import os
@@ -28,65 +29,57 @@ def assert_archive_or_dir(item):
 
 
 @pytest.fixture
-def tmp_file():
-    file_name = '/tmp/afs_token.txt'
-    with open(file_name, 'w') as f:
+def create_tmp_filesystem():
+    temp_dir = tempfile.TemporaryDirectory(dir='/tmp')
+    file_name = 'afs_token.txt'
+    full_name = os.path.join(temp_dir.name, file_name)
+    with open(full_name, 'w') as f:
         f.write('1234\n')
-    yield f
-    os.unlink(file_name)
+    afs.add_source('localtest', {
+        "kind": "local",
+        "base": temp_dir.name,
+        })
+    yield temp_dir.name
+    os.unlink(full_name)
 
 
-@pytest.mark.skip
-def test_ls(tmp_file):
-    with afs.connect('localtmp') as fs:
+def test_ls(create_tmp_filesystem):
+    with afs.connect('localtest') as fs:
         found = False
         for item in fs.ls():
-            if item.name == 'token.txt':
+            if item.name == 'afs_token.txt':
                 assert item.size == 5
                 found = True
             assert_archive_or_dir(item)
         assert found, 'File token.txt not found'
 
 
-@pytest.mark.skip
-def test_afs_connect():
-    with afs.connect('localtmp') as fs:
-        assert fs.name == 'localtmp'
-        assert fs.base == '/tmp'
+def test_afs_connect(create_tmp_filesystem):
+    with afs.connect('localtest') as fs:
+        assert fs.name == 'localtest'
+        assert fs.base == create_tmp_filesystem
         assert fs.is_connected
-        assert fs.get_local_path('hola.txt') == '/tmp/hola.txt'
 
 
-@pytest.mark.skip
-class TestMakeDir(unittest.TestCase):
-
-    def setUp(self):
-        self.assertFalse(os.path.isdir('/tmp/test_dir'))
-
-    def tearDown(self):
-        self.assertTrue(os.path.isdir('/tmp/test_dir'))
-        os.rmdir('/tmp/test_dir')
-
-    def test_mkdir(self):
-        with afs.connect('localtmp') as fs:
-            self.assertFalse(fs.is_dir('test_dir'))
-            fs.mkdir('test_dir')
-            self.assertTrue(fs.is_dir('test_dir'))
+def test_afs_get_local_path(create_tmp_filesystem):
+    with afs.connect('localtest') as fs:
+        expected = os.path.join(create_tmp_filesystem, 'hola.txt')
+        assert fs.get_local_path('hola.txt') == expected
 
 
-@pytest.mark.skip
-def test_save_text():
-    afs.configure_dict({
-        'localtemp': {
-            'kind': 'local',
-            'base': '/tmp',
-            }
-        })
-    with afs.connect('localtmp') as fs:
+def test_make_a_dir(create_tmp_filesystem):
+    with afs.connect('localtest') as fs:
+        assert fs.is_dir('test_dir') is False
+        fs.mkdir('test_dir')
+        assert fs.is_dir('test_dir')
+
+
+def test_save_text(create_tmp_filesystem):
+    with afs.connect('localtest') as fs:
         stream = StringIO(
             'hola, mundo reseña árbol épico '
-            'ínclito único óbice'.encode('utf-8')
-            )
+            'ínclito único óbice'
+        )
         size = fs.save('testigo.txt', stream)
         assert fs.is_file('testigo.txt')
         assert size == 56
