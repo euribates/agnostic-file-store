@@ -2,24 +2,35 @@
 # -*- coding: utf-8 -*-
 
 
-from distutils.core import setup
+from setuptools import setup
+
+KEYWORDS = [
+    'agnostic',
+    'AMS',
+    'CIFS',
+    'NAS',
+    'S3',
+    'Samba',
+    'SAN',
+    'SMB',
+    'storage',
+]
+
+DESCRIPTION = (
+    'An agnostic, easy-to-use module for different file systems'
+    ' (Memory | local | Samba (SMB) | NFS | Amazon S3)'
+)
 
 setup(
     name='agnostic-file-store',
+    version='0.4.2',
     packages=['afs'],
-    version='0.4.1',
-    description='An agnostic, easy-to-use module for different file systems'
-                  ' (At present just local an SMB)',
+    package_dir={"": "src"},    
+    setup_requires=['wheel'],
+    description=DESCRIPTION,
     author='Juan Ignacio Rodríguez de León',
     author_email='euribates@gmail.com',
     url='https://github.com/euribates/agnostic-file-store/',
     download_url='https://github.com/euribates/agnostic-file-store/archive/master.zip',
-    long_description='README.md',
-    long_description_content_type='markdown',
-    keywords=['agnostic', 'SAN', 'NAS', 'Samba', 'SMB', 'CIFS'],
-    classifiers= [
-        'Development Status :: 4 - Beta',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
-        ],
+    keywords=KEYWORDS,
     )

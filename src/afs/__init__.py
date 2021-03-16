@@ -47,7 +47,7 @@ change to a network SMB Server, modifying the configuration file to:
     service: test$
 """
 
-__version__ = '0.4.1'
+__version__ = '0.4.2'
 
 import os
 

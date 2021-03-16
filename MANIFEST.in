@@ -1,0 +1,5 @@
+
+include setup.py # Include setup.py
+include README.md  # Include the README
+include LICENSE.txt  # Include the license file
+include afs-sample.ini
