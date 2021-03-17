@@ -66,7 +66,8 @@ class LocalFileStorage(AgnosticFileStorage):
         full_path = self.get_local_path(filename)
         buff = stream.read()
         size = len(buff)
-        with open(full_path, 'wb') as _f:
+        mode = 'wb' if isinstance(buff, bytes) else 'w'
+        with open(full_path, mode) as _f:
             _f.write(buff)
         return size
 

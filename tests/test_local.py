@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 from __future__ import absolute_import
 
 import tempfile
-from six.moves import StringIO
+from six import StringIO, BytesIO
 
 import os
 import unittest
@@ -75,90 +75,84 @@ def test_make_a_dir(create_tmp_filesystem):
 
 
 def test_save_text(create_tmp_filesystem):
-    with afs.connect('localtest') as fs:
-        stream = StringIO(
+    source = (
             'hola, mundo reseña árbol épico '
             'ínclito único óbice'
         )
+    with afs.connect('localtest') as fs:
+        stream = StringIO(source)
         size = fs.save('testigo.txt', stream)
         assert fs.is_file('testigo.txt')
-        assert size == 56
+        assert size == 50
+        filename = os.path.join(create_tmp_filesystem, 'testigo.txt')
+        with open(filename, 'r') as f:
+            assert f.read() == source
 
 
-@pytest.mark.skip
-def test_save_image():
-    afs.configure_dict({
-        'localtemp': {
-            'kind': 'local',
-            'base': '/tmp',
-            }
-        })
-    with afs.connect('localtmp') as fs:
-        size = fs.save('escudo.png', open('./escudo.png', 'rb'))
-        assert fs.is_file('escudo.png')
-        assert size == 3514
+def test_save_binary(create_tmp_filesystem):
+    source = (
+        b'\x00\x01\x02\x03\x04\x05\x06\x07'
+        b'\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F'
+        b'\x10\x11\x12\x13\x14\x15\x16\x17'
+        b'\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F'
+    )
+    with afs.connect('localtest') as fs:
+        stream = BytesIO(source)
+        size = fs.save('output.bin', stream)
+        assert size == 32
+        filename = os.path.join(create_tmp_filesystem, 'output.bin')
+        with open(filename, 'rb') as f:
+            assert f.read() == source
 
 
-@pytest.mark.skip
-class TestRemoveFile(unittest.TestCase):
-
-    def test_rm(self):
-        test_filename = 'borrame.txt'
-        with afs.connect('localtmp') as fs:
-            self.assertFalse(fs.is_file(test_filename))
-            fs.save(test_filename, StringIO('Dumb file'.encode('utf-8')))
-            self.assertTrue(fs.is_file(test_filename))
-            fs.rm(test_filename)
-            self.assertFalse(fs.is_file(test_filename))
-
-    def test_rm_nonexistent_file(self):
-        '''Must return False and no error.
-        '''
-        with afs.connect('localtmp') as fs:
-            self.assertFalse(fs.rm('nonexistent_file.txt'))
-
-    def test_try_to_rm_a_dir_fails(self):
-        '''Triying to remove a directory must fail.
-        '''
-        with afs.connect('localtmp') as fs:
-            fs.mkdir('uno')
-            with pytest.raises(Exception):
-                fs.rm('uno')
-            fs.rmdir('uno')
+def test_remove_file(create_tmp_filesystem):
+    test_filename = 'borrame.txt'
+    with afs.connect('localtest') as fs:
+        assert not fs.is_file(test_filename)
+        fs.save(test_filename, StringIO('Dumb file'))
+        assert fs.is_file(test_filename)
+        was_deleted = fs.rm(test_filename)
+        assert was_deleted
+        assert not fs.is_file(test_filename)
 
 
-@pytest.mark.skip
-class ChangeDir(unittest.TestCase):
-
-    def setUp(self):
-        os.mkdir('/tmp/uno')
-        os.mkdir('/tmp/uno/dos')
-
-    def test_cd(self):
-        with afs.connect('localtmp') as fs:
-            fs.cd('uno')
-            self.assertEqual(fs.cwd(), ['uno'])
-            self.assertEqual(fs.get_local_path(), '/tmp/uno')
-            fs.cd('dos')
-            self.assertEqual(fs.cwd(), ['uno', 'dos'])
-            self.assertEqual(fs.get_local_path(), '/tmp/uno/dos')
-
-    def tearDown(self):
-        os.rmdir('/tmp/uno/dos')
-        os.rmdir('/tmp/uno')
+def test_remove_non_existent_file(create_tmp_filesystem):
+    '''Must return False and no error.
+    '''
+    with afs.connect('localtest') as fs:
+        assert fs.rm('nonexistent_file.txt') is False
 
 
-@pytest.mark.skip()
-class TestUso(unittest.TestCase):
+def test_try_to_rm_a_dir_fails(create_tmp_filesystem):
+    '''Triying to remove a directory must fail.
+    '''
+    with afs.connect('localtest') as fs:
+        fs.mkdir('uno')
+        with pytest.raises(ValueError):
+            fs.rm('uno')
+        fs.rmdir('uno')
 
-    def test_rmdir(self):
-        test_dir = 'removable_dir'
-        with afs.connect('localtmp') as fs:
-            self.assertFalse(fs.is_dir(test_dir), 'Directory exists (It must NOT)')
-            fs.mkdir(test_dir)
-            self.assertTrue(fs.is_dir(test_dir), 'Directory doesn\'t exists (and it must)')
-            fs.rmdir(test_dir)
-            self.assertFalse(fs.is_dir(test_dir), 'Directory exists (It must NOT)')
+
+@pytest.mark.wip
+def test_cd(create_tmp_filesystem):
+    base = create_tmp_filesystem
+    os.makedirs(os.path.join(base, 'uno/dos'))
+    with afs.connect('localtest') as fs:
+        fs.cd('uno')
+        assert fs.cwd() == ['uno']
+        assert fs.get_local_path() == os.path.join(base, 'uno')
+        fs.cd('dos')
+        assert fs.cwd(), ['uno' == 'dos']
+        assert fs.get_local_path() == os.path.join(base, 'uno', 'dos')
+
+
+def test_rmdir(create_tmp_filesystem):
+    with afs.connect('localtest') as fs:
+        assert not fs.is_dir('etc')
+        fs.mkdir('etc')
+        assert fs.is_dir('etc')
+        fs.rmdir('etc')
+        assert not fs.is_dir('etc')
 
 
 if __name__ == '__main__':
