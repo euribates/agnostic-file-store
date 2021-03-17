@@ -66,8 +66,10 @@ class AgnosticFileStorage(object):
         return self
 
     def close(self):
-        super(AgnosticFileStorage, self).__init__()
         self.is_connected = False
+
+    def __del__(self):
+        self.close()
 
     def __enter__(self):
         self.current_dir = []

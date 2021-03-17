@@ -133,7 +133,6 @@ def test_try_to_rm_a_dir_fails(create_tmp_filesystem):
         fs.rmdir('uno')
 
 
-@pytest.mark.wip
 def test_cd(create_tmp_filesystem):
     base = create_tmp_filesystem
     os.makedirs(os.path.join(base, 'uno/dos'))

@@ -100,7 +100,7 @@ class LocalFileStorage(AgnosticFileStorage):
         if not self.is_connected:
             raise errors.no_conexion()
         if self.is_dir(file_name):
-            raise errors.rm_can_not_delete_directories()
+            raise errors.can_not_delete_directory(file_name)
         if self.is_file(file_name):
             full_path = self.get_local_path(file_name)
             os.unlink(full_path)

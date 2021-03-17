@@ -34,10 +34,19 @@ def configuration_not_found():
         )
 
 
-def rm_can_not_delete_directories():
+def can_not_delete_directory(name):
     return ValueError(
-        "Can't delete a directory with method rm().\n"
-        "Use the rmdir() method."
+        "Can not delete {name} with method rm()"
+        " because is a directory."
+        " Use the rmdir() method.".format(name=name)
+        )
+
+
+def can_not_delete_file(name):
+    return ValueError(
+        "Can not delete {name} with method rmdir()"
+        " because is a regular file."
+        " Use the rm() method.".format(name=name)
         )
 
 
@@ -48,3 +57,10 @@ def config_file_not_found(kind, config_file):
         "Configuration file is {f}."
         .format(k=kind, f=config_file)
         )
+
+
+def directory_is_not_empty(dir_name):
+    raise ValueError(
+        "Can't delete directory {dir_name},"
+        "it's not empty.".format(dir_name=dir_name)
+    )

@@ -75,11 +75,12 @@ class SMBFileStorage(AgnosticFileStorage):
             is_direct_tcp=True,
             )
         self.is_connected = self.conn.connect(self.server_ip, 445)
+        super(SMBFileStorage, self).open()
         return self
 
     def close(self):
         self.conn.close()
-        self.is_connected = False
+        super(SMBFileStorage, self).close()
 
     def is_dir(self, path):
         full_path = self.get_absolute_path(path)
