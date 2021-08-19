@@ -28,24 +28,13 @@ class SMBFileStorage(AgnosticFileStorage):
     def __init__(self, name, **kwargs):
         super(SMBFileStorage, self).__init__(name)
         self.username = self.get_value(kwargs, 'username')
-        if self.username:
-            self.username = self.username.encode('utf-8')
-        else:
-            raise ValueError('Unknown SMB user for {}'.format(name))
         self.password = self.get_value(kwargs, 'password')
-        if self.password:
-            self.password = self.password.encode('utf-8')
-        else:
-            raise ValueError('Unknown SMB password for {}'.format(name))
-        self.host = self.get_value(kwargs, 'host').encode('utf-8')
+        self.host = self.get_value(kwargs, 'host')
         self.client = socket.gethostname()
-        self.domain = self.get_value(kwargs, 'domain').encode('utf-8')
-        self.service = self.get_value(kwargs, 'service').encode('utf-8')
+        self.domain = self.get_value(kwargs, 'domain')
+        self.service = self.get_value(kwargs, 'service')
         self.fqn = '{}.{}'.format(self.host, self.domain)
-        try:
-            self.server_ip = socket.gethostbyname(self.fqn)
-        except OSError:
-            self.server_ip = None
+        self.server_ip = socket.gethostbyname(self.fqn)
         self.is_connected = False
 
     def __str__(self):
@@ -100,7 +89,7 @@ class SMBFileStorage(AgnosticFileStorage):
             return False
 
     def ls(self):
-        logger.info('Call method ls in SMBFileStorage("%s")', self.name)
+        logger.debug('Call method ls in SMBFileStorage("%s")', self.name)
         tries = 0
         if self.is_connected:
             while tries < NUM_RETRIES:
