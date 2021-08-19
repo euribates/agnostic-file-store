@@ -79,7 +79,8 @@ class SMBFileStorage(AgnosticFileStorage):
         return self
 
     def close(self):
-        self.conn.close()
+        if self.is_connected:
+            self.conn.close()
         super(SMBFileStorage, self).close()
 
     def is_dir(self, path):

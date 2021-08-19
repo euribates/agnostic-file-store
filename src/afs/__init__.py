@@ -62,7 +62,7 @@ def read_configuration():
             for name in config.sections():
                 args = dict(config.items(name))
                 add_source(name, args)
-            return
+            return sources
 
 
 def connect(name):
