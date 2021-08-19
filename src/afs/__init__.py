@@ -10,7 +10,7 @@ The initial use of this module was provide an easy path to translate
 local file systems operations to a network samba server.
 """
 
-__version__ = '0.4.3'
+__version__ = '0.5.0'
 
 import os
 
