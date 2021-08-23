@@ -28,42 +28,32 @@ class SMBFileStorage(AgnosticFileStorage):
     def __init__(self, name, **kwargs):
         super(SMBFileStorage, self).__init__(name)
         self.username = self.get_value(kwargs, 'username')
-        if self.username:
-            self.username = self.username.encode('utf-8')
-        else:
-            raise ValueError('Unknown SMB user for {}'.format(name))
         self.password = self.get_value(kwargs, 'password')
-        if self.password:
-            self.password = self.password.encode('utf-8')
-        else:
-            raise ValueError('Unknown SMB password for {}'.format(name))
-        self.host = self.get_value(kwargs, 'host').encode('utf-8')
+        self.host = self.get_value(kwargs, 'host')
         self.client = socket.gethostname()
-        self.domain = self.get_value(kwargs, 'domain').encode('utf-8')
-        self.service = self.get_value(kwargs, 'service').encode('utf-8')
-        self.fqn = '{}.{}'.format(self.host, self.domain)
-        try:
-            self.server_ip = socket.gethostbyname(self.fqn)
-        except OSError:
-            self.server_ip = None
+        self.domain = self.get_value(kwargs, 'domain')
+        self.service = self.get_value(kwargs, 'service')
         self.is_connected = False
+        import logging; logging.error("self.fqn is %s", self.fqn)
 
-    def __str__(self):
-        bar = '-' * (59 - len(self.name))
-        buff = ['--[ SMBFileStorage {} ]{}'.format(self.name, bar)]
-        buff.append('username: {}'.format(self.username))
-        buff.append('host: {}'.format(self.host))
-        buff.append('client {}'.format(self.client))
-        buff.append('domain: {}'.format(self.domain))
-        buff.append('service: {}'.format(self.service))
-        buff.append('fqn: {}'.format(self.fqn))
-        buff.append('server IP: {}'.format(self.server_ip))
-        buff.append('Current dir: {}'.format(self.current_dir))
-        buff.append('Is Connected: {}'.format(self.is_connected))
-        buff.append('-'*80)
-        return '\n'.join(buff)
+    @property
+    def fqn(self):
+        if self.domain:
+            return '{}.{}'.format(self.domain, self.name)
+        else:
+            return self.host
+
+    def __repr__(self):
+        buff = [f'SMBFileStorage({self.name}']
+        buff.append('username={self.username!repr}')
+        buff.append('host={self.host!repr}')
+        buff.append('host={self.host!repr}')
+        buff.append('domain={self.domain!repr}')
+        buff.append('service={self.service!repr})')
+        return ', '.join(buff)
 
     def open(self):
+        import logging; logging.error("self is %r (%s)", self, type(self))
         self.conn = SMBConnection(
             self.username,
             self.password,
@@ -74,7 +64,7 @@ class SMBFileStorage(AgnosticFileStorage):
             sign_options=SMBConnection.SIGN_NEVER,
             is_direct_tcp=True,
             )
-        self.is_connected = self.conn.connect(self.server_ip, 445)
+        self.is_connected = self.conn.connect(self.fqn, 445)
         super(SMBFileStorage, self).open()
         return self
 
