@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 from __future__ import absolute_import
 
 
-def no_conexion():
+def no_connection():
     raise ValueError(
         "The AFS system is not connected."
         "You can't call any method until the conexion"
@@ -63,4 +63,10 @@ def directory_is_not_empty(dir_name):
     raise ValueError(
         "Can't delete directory {dir_name},"
         "it's not empty.".format(dir_name=dir_name)
+    )
+
+
+def read_error(dir_name):
+    return ValueError(
+        "Can't read the content of {}".format(dir_name)
     )

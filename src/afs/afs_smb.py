@@ -11,8 +11,18 @@ import socket
 from smb.SMBConnection import SMBConnection
 from smb.smb_structs import OperationFailure
 
-from .core import AFSFile, AFSDirectory, AFSListing, AgnosticFileStorage
-from .exceptions import AgnosticFileStorageError
+from .core import (
+    AFSDirectory,
+    AFSFile,
+    AFSListing,
+    AgnosticFileStorage,
+)
+from .errors import (
+    can_not_delete_directory,
+    can_not_delete_file,
+    no_connection,
+    read_error,
+)
 from . import log
 
 
@@ -34,7 +44,6 @@ class SMBFileStorage(AgnosticFileStorage):
         self.domain = self.get_value(kwargs, 'domain')
         self.service = self.get_value(kwargs, 'service')
         self.is_connected = False
-        import logging; logging.error("self.fqn is %s", self.fqn)
 
     @property
     def fqn(self):
@@ -53,7 +62,6 @@ class SMBFileStorage(AgnosticFileStorage):
         return ', '.join(buff)
 
     def open(self):
-        import logging; logging.error("self is %r (%s)", self, type(self))
         self.conn = SMBConnection(
             self.username,
             self.password,
@@ -90,7 +98,7 @@ class SMBFileStorage(AgnosticFileStorage):
             return False
 
     def ls(self):
-        logger.info('Call method ls in SMBFileStorage("%s")', self.name)
+        logger.debug('Call method ls in SMBFileStorage("%s")', self.name)
         tries = 0
         if self.is_connected:
             while tries < NUM_RETRIES:
@@ -103,15 +111,11 @@ class SMBFileStorage(AgnosticFileStorage):
                         else:
                             result.append(AFSFile(f.filename, f.file_size))
                     return result
-                except Exception as err:
-                    pass
-                finally:
+                except Exception:
                     tries += 1
-            raise AgnosticFileStorageError(
-                "Can't read the content of {}".format(self.cwd())
-                )
+            raise read_error(self.cwd())
         else:
-            raise AgnosticFileStorageError('No connection')
+            raise no_connection()
 
     # @log.trace(logger)
     def save(self, filename, stream):
@@ -120,7 +124,7 @@ class SMBFileStorage(AgnosticFileStorage):
             bytes_stored = self.conn.storeFile(self.service, full_path, stream)
             return bytes_stored
         else:
-            raise AgnosticFileStorageError('No connection')
+            raise no_connection()
 
     def mkdir(self, dir_name):
         logger.debug('Calling method mkdir("{}") in SMBFileStorage("{}")'.format(
@@ -135,7 +139,7 @@ class SMBFileStorage(AgnosticFileStorage):
             else:
                 return False
         else:
-            raise AgnosticFileStorageError('No connection')
+            raise no_connection()
 
     def rmdir(self, dir_name):
         logger.debug('Calling method rmdir("{}") in SMBFileStorage("{}")'.format(
@@ -147,10 +151,12 @@ class SMBFileStorage(AgnosticFileStorage):
                 full_path = self.get_absolute_path(dir_name)
                 self.conn.deleteDirectory(self.service, full_path)
                 return True
+            elif self.is_file(dir_name):
+                raise can_not_delete_file(dir_name)
             else:
                 return False
         else:
-            raise AgnosticFileStorageError('No connection')
+            raise no_connection()
 
     def rm(self, file_name):
         logger.debug('Calling method rm("{}") in SMBFileStorage("{}")'.format(
@@ -163,13 +169,8 @@ class SMBFileStorage(AgnosticFileStorage):
                 self.conn.deleteFiles(self.service, full_path)
                 return True
             elif self.is_dir(file_name):
-                raise AgnosticFileStorageError(
-                    "Can't delete a directory with method rm().\n"
-                    "Use the rmdir() method"
-                    )
+                raise can_not_delete_directory(file_name)
             else:
                 return False
         else:
-            raise AgnosticFileStorageError('No connection')
-
-
+            raise no_connection()
