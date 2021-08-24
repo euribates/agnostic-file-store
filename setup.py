@@ -27,6 +27,7 @@ setup(
     packages=['afs'],
     package_dir={"": "src"},    
     setup_requires=['wheel'],
+    install_requires=['pysmb'],
     description=DESCRIPTION,
     author='Juan Ignacio Rodríguez de León',
     author_email='euribates@gmail.com',
