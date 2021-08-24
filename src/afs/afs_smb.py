@@ -48,7 +48,7 @@ class SMBFileStorage(AgnosticFileStorage):
     @property
     def fqn(self):
         if self.domain:
-            return '{}.{}'.format(self.domain, self.name)
+            return '{}.{}'.format(self.host, self.domain)
         else:
             return self.host
 
@@ -72,6 +72,7 @@ class SMBFileStorage(AgnosticFileStorage):
             sign_options=SMBConnection.SIGN_NEVER,
             is_direct_tcp=True,
             )
+        import logging; logging.error("self.fqn is %r (%s)", self.fqn, type(self.fqn))
         self.is_connected = self.conn.connect(self.fqn, 445)
         super(SMBFileStorage, self).open()
         return self
