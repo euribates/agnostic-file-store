@@ -23,7 +23,7 @@ DESCRIPTION = (
 
 setup(
     name='agnostic-file-store',
-    version='0.5.0',
+    version='0.5.1',
     packages=['afs'],
     package_dir={"": "src"},    
     setup_requires=['wheel'],
