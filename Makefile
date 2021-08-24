@@ -3,10 +3,10 @@
 PROJECT = $(shell pwd)
 
 test:
-	python -m pytest -vvxs src/tests/
+	python -m pytest -xs tests/
 
 testwip:
-	python -m pytest -vvxs -m wip src/tests/
+	python -m pytest -vvxs -m wip tests/
 
 check:
 	twine check --strict dist/*
