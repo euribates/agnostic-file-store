@@ -23,17 +23,17 @@ def test_call_connect_local():
 def test_call_connect_smb():
     afs.add_source('smbtest', {
         'kind': 'smb',
-        'username': 'jileon',
+        'username': 'euribates',
         'host': 'localhost',
         'domain': '',
         'service': 'test$',
-        'password': 'dfbef574829',
+        'password': 'Aqui va la password',
     })
     _fs = afs.sources['smbtest']
-    assert _fs.username == b'jileon'
-    assert _fs.host == b'localhost'
-    assert _fs.domain == b''
-    assert _fs.service == b'test$'
+    assert _fs.username == 'euribates'
+    assert _fs.host == 'localhost'
+    assert _fs.domain == ''
+    assert _fs.service == 'test$'
 
 
 def test_call_connect_memory():

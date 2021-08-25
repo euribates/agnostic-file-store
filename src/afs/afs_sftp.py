@@ -39,8 +39,6 @@ class SFTPFileStorage(AgnosticFileStorage):
         self.client = None
         super(SFTPFileStorage, self).close()
 
-
-
     def _it_exists(self, filename):
         try:
             self.client.stat(filename)

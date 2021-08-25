@@ -10,21 +10,23 @@ The initial use of this module was provide an easy path to translate
 local file systems operations to a network samba server.
 """
 
-__version__ = '0.5.0'
+__version__ = '0.5.1'
 
 import os
 
 from six.moves import configparser
 
 from . import errors
-from .afs_memory import MemoryFileStorage
-from .afs_smb import SMBFileStorage
 from .afs_local import LocalFileStorage
+from .afs_memory import MemoryFileStorage
+from .afs_sftp import SFTPFileStorage
+from .afs_smb import SMBFileStorage
 
 
 KIND_MAP = {
-    'memory': MemoryFileStorage,
     'local': LocalFileStorage,
+    'memory': MemoryFileStorage,
+    'sftp': SFTPFileStorage,
     'smb': SMBFileStorage,
 }
 
