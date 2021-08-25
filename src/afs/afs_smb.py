@@ -53,7 +53,7 @@ class SMBFileStorage(AgnosticFileStorage):
             return self.host
 
     def __repr__(self):
-        buff = [f'SMBFileStorage({self.name}']
+        buff = ['SMBFileStorage({}'.format(self.name)]
         buff.append('username={self.username!repr}')
         buff.append('host={self.host!repr}')
         buff.append('host={self.host!repr}')
