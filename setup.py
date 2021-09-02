@@ -1,8 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import re
 
 from setuptools import setup
+
+
+def get_version():
+    """Get the current version of the package.
+
+    We parse the file in order to not execute the code.
+    """
+    pat_version = re.compile(r"__version__\s*=\s*['\"](.+)['\"]")
+    version_file = "src/afs/__init__.py"
+    with open(version_file) as f:
+        for line in f:
+            m = pat_version.match(line)
+            if m:
+                return m.group(1)
+    raise ValueError("AFS: setup.py can't read the version number")
+
 
 KEYWORDS = [
     'agnostic',
@@ -23,7 +40,7 @@ DESCRIPTION = (
 
 setup(
     name='agnostic-file-store',
-    version='0.5.1',
+    version=get_version(),
     packages=['afs'],
     package_dir={"": "src"},    
     setup_requires=['wheel'],
