@@ -8,6 +8,7 @@ from __future__ import absolute_import
 
 import socket
 
+from six import BytesIO
 from smb.SMBConnection import SMBConnection
 from smb.smb_structs import OperationFailure
 
@@ -53,7 +54,7 @@ class SMBFileStorage(AgnosticFileStorage):
             return self.host
 
     def __repr__(self):
-        buff = [f'SMBFileStorage({self.name}']
+        buff = ['SMBFileStorage({}'.format(self.name)]
         buff.append('username={self.username!repr}')
         buff.append('host={self.host!repr}')
         buff.append('host={self.host!repr}')
@@ -114,7 +115,7 @@ class SMBFileStorage(AgnosticFileStorage):
                     return result
                 except Exception:
                     tries += 1
-            raise read_error(self.cwd())
+            raise read_error(self.cwd(), num_tries=tries)
         else:
             raise no_connection()
 
@@ -126,6 +127,14 @@ class SMBFileStorage(AgnosticFileStorage):
             return bytes_stored
         else:
             raise no_connection()
+
+    def read_content(self, filename):
+        if self.is_connected:
+            full_path = self.get_absolute_path(filename)
+            buff = BytesIO()
+            (attrb, size) = self.conn.retrieveFile(self.service, full_path, buff)
+            buff.seek(0)
+            return (size, buff)
 
     def mkdir(self, dir_name):
         logger.debug('Calling method mkdir("{}") in SMBFileStorage("{}")'.format(

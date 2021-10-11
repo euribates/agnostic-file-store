@@ -66,7 +66,11 @@ def directory_is_not_empty(dir_name):
     )
 
 
-def read_error(dir_name):
+def read_error(dir_name, num_tries=0):
     return ValueError(
-        "Can't read the content of {}".format(dir_name)
+        "Can't read the content of {!r}"
+        " (tried {} times)".format(
+            dir_name,
+            num_tries,
+            )
     )
